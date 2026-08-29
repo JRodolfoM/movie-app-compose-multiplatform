@@ -1,56 +1,104 @@
 package br.com.jrmantovani.movies.ui.features.movie
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import br.com.jrmantovani.movies.ui.components.MoviePoster
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.jrmantovani.movies.data.repository.MovieRepository
+import br.com.jrmantovani.movies.domain.MovieSection
+import br.com.jrmantovani.movies.domain.movie1
+import br.com.jrmantovani.movies.ui.components.MovieSectionComp
+import io.ktor.websocket.Frame
+
 
 @Composable
-fun MoviesListScreenRoute() {
-    MoviesListScreen()
+fun MoviesListScreenRoute(
+    viewModel: MoviesListViewModel = viewModel {
+        MoviesListViewModel(MovieRepository())
+    }
+) {
+   val moviesListState by viewModel.moviesListState.collectAsStateWithLifecycle()
+
+
+    MoviesListScreen(moviesListState = moviesListState)
 }
 
 
 @Composable
-fun MoviesListScreen() {
+fun MoviesListScreen(
+    moviesListState: MoviesListViewModel.MoviesListState
+) {
 
     Scaffold (){padding ->
-        LazyColumn (modifier = Modifier
-            .padding(padding),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            ){
-            item {
-                Column {
-                    Text(
-                        text = "Popular Movies",
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        style = MaterialTheme.typography.titleLarge
-                        )
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
 
-                    LazyRow (modifier = Modifier
-                        .padding(top = 8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ){
+
+            when(moviesListState){
+
+                MoviesListViewModel.MoviesListState.Loading ->{
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align (Alignment.Center)
+                    )
+                }
+                is MoviesListViewModel.MoviesListState.Success -> {
+                    LazyColumn (modifier = Modifier
+                        .padding(padding),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(32.dp)
                     ){
-                       items(10){
-                           MoviePoster()
-                       }
+                        items(moviesListState.moviesSection){ moviSection ->
+                            val title = when(moviSection.sectionType){
+                                MovieSection.SectionType.POPULAR -> "Popular Movies"
+                                MovieSection.SectionType.TOP_RATED -> "Top Rated Movies"
+                                MovieSection.SectionType.UPCOMING -> "Upcoming Movies"
+                            }
+
+                           MovieSectionComp(
+                                title = title,
+                                movies = moviSection.movies
+                            )
+
+                        }
+
+
+
+
 
                     }
                 }
+                is MoviesListViewModel.MoviesListState.Error -> {
+                    Text(
+                        text = moviesListState.message,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
-
 
         }
     }
@@ -62,6 +110,23 @@ fun MoviesListScreen() {
 @Composable
 private fun MoviesListScreenPreview() {
     MaterialTheme{
-        MoviesListScreen()
+        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Success(
+            listOf(MovieSection(sectionType = MovieSection.SectionType.POPULAR, movies = listOf(movie1, movie1, movie1)))))
         }
+}
+
+@Preview
+@Composable
+private fun MoviesListScreenErrorPreview() {
+    MaterialTheme{
+        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Error("Error"))
+    }
+}
+
+@Preview
+@Composable
+private fun MoviesListScreenLoadingPreview() {
+    MaterialTheme{
+        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Loading)
+    }
 }

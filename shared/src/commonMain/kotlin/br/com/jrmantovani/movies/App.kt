@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import br.com.jrmantovani.movies.navigation.AppRoutes
-import br.com.jrmantovani.movies.ui.features.movie.MoviesListScreen
+import br.com.jrmantovani.movies.ui.features.movie.MoviesListScreenRoute
 
 
 @Composable
@@ -20,10 +20,10 @@ fun App() {
         val navController = rememberNavController()
         NavHost(navController, startDestination = AppRoutes.MoviesList) {
             composable<AppRoutes.MoviesList> {
-                MoviesListScreen()
+                MoviesListScreenRoute()
             }
             composable<AppRoutes.MovieDetails> {
-                //MovieDetailsScreen()
+                //MovieDetailsScreenRoute()
             }
         }
     }
