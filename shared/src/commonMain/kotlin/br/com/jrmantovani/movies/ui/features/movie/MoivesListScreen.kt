@@ -28,13 +28,12 @@ import br.com.jrmantovani.movies.domain.MovieSection
 import br.com.jrmantovani.movies.domain.movie1
 import br.com.jrmantovani.movies.ui.components.MovieSectionComp
 import io.ktor.websocket.Frame
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
 fun MoviesListScreenRoute(
-    viewModel: MoviesListViewModel = viewModel {
-        MoviesListViewModel(MovieRepository())
-    }
+    viewModel: MoviesListViewModel = koinViewModel ()
 ) {
    val moviesListState by viewModel.moviesListState.collectAsStateWithLifecycle()
 

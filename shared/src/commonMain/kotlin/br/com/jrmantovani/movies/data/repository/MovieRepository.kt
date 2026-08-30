@@ -1,6 +1,6 @@
 package br.com.jrmantovani.movies.data.repository
 
-import br.com.jrmantovani.movies.data.network.KtorClient
+import br.com.jrmantovani.movies.data.network.MovieNetworkDataSource
 import br.com.jrmantovani.movies.domain.MovieSection
 import br.com.jrmantovani.movies.domain.toModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -10,14 +10,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
 class MovieRepository(
+    private val movieNetworkDataSource: MovieNetworkDataSource,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     suspend fun getMovieSections(): List<MovieSection>{
         return withContext(ioDispatcher){
-            val popularMoviesDeferred = async {  KtorClient.getMovies("popular") }
-            val topRatedMoviesDeferred = async {  KtorClient.getMovies("top_rated") }
-            val upcomingMoviesDeferred = async {  KtorClient.getMovies("upcoming") }
+            val popularMoviesDeferred = async {  movieNetworkDataSource.getMovies("popular") }
+            val topRatedMoviesDeferred = async {  movieNetworkDataSource.getMovies("top_rated") }
+            val upcomingMoviesDeferred = async {  movieNetworkDataSource.getMovies("upcoming") }
 
             val popularMovies = popularMoviesDeferred.await()
             val topRatedMovies = topRatedMoviesDeferred.await()
