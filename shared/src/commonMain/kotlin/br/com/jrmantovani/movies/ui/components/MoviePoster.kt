@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.jrmantovani.movies.domain.Movie
 import br.com.jrmantovani.movies.domain.movie1
+import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
 import coil3.compose.AsyncImage
 
 @Composable
@@ -54,7 +55,7 @@ fun MoviePoster(
 @Preview(showBackground = true)
 @Composable
 private fun MoviePosterPreview() {
-    MaterialTheme(){
+    MoviesAppTheme(){
         MoviePoster(movie1)
        }
 }

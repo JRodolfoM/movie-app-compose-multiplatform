@@ -27,7 +27,13 @@ import br.com.jrmantovani.movies.data.repository.MovieRepository
 import br.com.jrmantovani.movies.domain.MovieSection
 import br.com.jrmantovani.movies.domain.movie1
 import br.com.jrmantovani.movies.ui.components.MovieSectionComp
+import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
 import io.ktor.websocket.Frame
+import movies.shared.generated.resources.Res
+import movies.shared.generated.resources.movies_list_popular_movies
+import movies.shared.generated.resources.movies_list_top_rated_movies
+import movies.shared.generated.resources.movies_list_upcoming_movies
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -70,9 +76,9 @@ fun MoviesListScreen(
                     ){
                         items(moviesListState.moviesSection){ moviSection ->
                             val title = when(moviSection.sectionType){
-                                MovieSection.SectionType.POPULAR -> "Popular Movies"
-                                MovieSection.SectionType.TOP_RATED -> "Top Rated Movies"
-                                MovieSection.SectionType.UPCOMING -> "Upcoming Movies"
+                                MovieSection.SectionType.POPULAR -> stringResource(Res.string.movies_list_popular_movies)
+                                MovieSection.SectionType.TOP_RATED -> stringResource(Res.string.movies_list_top_rated_movies)
+                                MovieSection.SectionType.UPCOMING -> stringResource(Res.string.movies_list_upcoming_movies)
                             }
 
                            MovieSectionComp(
@@ -108,7 +114,7 @@ fun MoviesListScreen(
 @Preview
 @Composable
 private fun MoviesListScreenPreview() {
-    MaterialTheme{
+    MoviesAppTheme{
         MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Success(
             listOf(MovieSection(sectionType = MovieSection.SectionType.POPULAR, movies = listOf(movie1, movie1, movie1)))))
         }
@@ -117,7 +123,7 @@ private fun MoviesListScreenPreview() {
 @Preview
 @Composable
 private fun MoviesListScreenErrorPreview() {
-    MaterialTheme{
+    MoviesAppTheme{
         MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Error("Error"))
     }
 }
@@ -125,7 +131,7 @@ private fun MoviesListScreenErrorPreview() {
 @Preview
 @Composable
 private fun MoviesListScreenLoadingPreview() {
-    MaterialTheme{
+    MoviesAppTheme{
         MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Loading)
     }
 }

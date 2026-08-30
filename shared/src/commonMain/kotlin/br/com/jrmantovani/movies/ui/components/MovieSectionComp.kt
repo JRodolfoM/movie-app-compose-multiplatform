@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.jrmantovani.movies.domain.Movie
 import br.com.jrmantovani.movies.domain.movie1
+import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
 
 @Composable
 fun MovieSectionComp(
@@ -49,7 +50,7 @@ fun MovieSectionComp(
 @Preview(showBackground = true)
 @Composable
 private fun MovieSectionCompPreview() {
-    MaterialTheme(){
+    MoviesAppTheme(){
 
         MovieSectionComp(title = "Popular Movies", movies = listOf(movie1, movie1, movie1, movie1))
        }

@@ -1,0 +1,5 @@
+<resources>
+    <string name="movies_list_popular_movies">Filmes popularares</string>
+    <string name="movies_list_top_rated_movies">Filmes melhores avaliados</string>
+    <string name="movies_list_upcoming_movies">Próximos lançamentos</string>
+</resources>
