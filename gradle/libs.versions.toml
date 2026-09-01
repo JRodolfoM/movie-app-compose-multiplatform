@@ -22,6 +22,7 @@ kotlinx-coroutines = "1.11.0"
 buildkonfig = "0.22.0"
 coil = "3.6.0"
 koin = "4.2.0"
+xicon_pack_z = "1.1.1"
 
 [libraries]
 
@@ -65,6 +66,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation" }
 
 koin-test = { module = "io.insert-koin:koin-test" }
+xicon_pack_z = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "xicon_pack_z" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
