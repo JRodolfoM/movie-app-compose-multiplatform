@@ -20,6 +20,7 @@ import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
 fun MovieSectionComp(
     title: String,
     movies: List<Movie>,
+    onMoviePosterClick: (movieId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column (modifier=modifier){
@@ -36,7 +37,7 @@ fun MovieSectionComp(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ){
             items(movies){movie->
-                MoviePoster(movie = movie)
+                MoviePoster(movie = movie, onMoviePosterClick = { onMoviePosterClick(movie.id) })
             }
 
         }
@@ -52,6 +53,6 @@ fun MovieSectionComp(
 private fun MovieSectionCompPreview() {
     MoviesAppTheme(){
 
-        MovieSectionComp(title = "Popular Movies", movies = listOf(movie1, movie1, movie1, movie1))
+        MovieSectionComp(title = "Popular Movies", movies = listOf(movie1, movie1, movie1, movie1), onMoviePosterClick = {})
        }
 }

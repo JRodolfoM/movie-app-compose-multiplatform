@@ -14,6 +14,8 @@ import br.com.jrmantovani.movies.di.networkClient
 import br.com.jrmantovani.movies.di.viewModelsModule
 import br.com.jrmantovani.movies.navigation.AppRoutes
 import br.com.jrmantovani.movies.ui.features.movie.MoviesListScreenRoute
+import br.com.jrmantovani.movies.ui.features.moviedetail.MovieDetailsRoute
+import br.com.jrmantovani.movies.ui.features.moviedetail.MovieDetailsScreen
 import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -28,10 +30,13 @@ fun App() {
             val navController = rememberNavController()
             NavHost(navController, startDestination = AppRoutes.MoviesList) {
                 composable<AppRoutes.MoviesList> {
-                    MoviesListScreenRoute()
+                    MoviesListScreenRoute(navigateToMovieDetails={movieId ->
+                        navController.navigate(AppRoutes.MovieDetails(movieId))
+
+                    })
                 }
                 composable<AppRoutes.MovieDetails> {
-                    //MovieDetailsScreenRoute()
+                    MovieDetailsRoute()
                 }
             }
         }

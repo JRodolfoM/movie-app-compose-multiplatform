@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.jrmantovani.movies.data.repository.MovieRepository
+import br.com.jrmantovani.movies.domain.Movie
 import br.com.jrmantovani.movies.domain.MovieSection
 import br.com.jrmantovani.movies.domain.movie1
 import br.com.jrmantovani.movies.ui.components.MovieSectionComp
@@ -39,18 +40,24 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MoviesListScreenRoute(
-    viewModel: MoviesListViewModel = koinViewModel ()
+    viewModel: MoviesListViewModel = koinViewModel (),
+    navigateToMovieDetails: (movieId: Int) -> Unit,
 ) {
    val moviesListState by viewModel.moviesListState.collectAsStateWithLifecycle()
 
 
-    MoviesListScreen(moviesListState = moviesListState)
+    MoviesListScreen(
+        moviesListState = moviesListState,
+        onMovieClick = navigateToMovieDetails
+
+    )
 }
 
 
 @Composable
 fun MoviesListScreen(
-    moviesListState: MoviesListViewModel.MoviesListState
+    moviesListState: MoviesListViewModel.MoviesListState,
+    onMovieClick: (movieId: Int) -> Unit,
 ) {
 
     Scaffold (){padding ->
@@ -83,7 +90,8 @@ fun MoviesListScreen(
 
                            MovieSectionComp(
                                 title = title,
-                                movies = moviSection.movies
+                                movies = moviSection.movies,
+                                onMoviePosterClick = onMovieClick
                             )
 
                         }
@@ -116,7 +124,12 @@ fun MoviesListScreen(
 private fun MoviesListScreenPreview() {
     MoviesAppTheme{
         MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Success(
-            listOf(MovieSection(sectionType = MovieSection.SectionType.POPULAR, movies = listOf(movie1, movie1, movie1)))))
+            listOf(MovieSection(sectionType = MovieSection.SectionType.POPULAR, movies = listOf(movie1, movie1, movie1)))),
+
+                onMovieClick = {}
+        )
+
+
         }
 }
 
@@ -124,7 +137,7 @@ private fun MoviesListScreenPreview() {
 @Composable
 private fun MoviesListScreenErrorPreview() {
     MoviesAppTheme{
-        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Error("Error"))
+        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Error("Error"), onMovieClick = {})
     }
 }
 
@@ -132,6 +145,6 @@ private fun MoviesListScreenErrorPreview() {
 @Composable
 private fun MoviesListScreenLoadingPreview() {
     MoviesAppTheme{
-        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Loading)
+        MoviesListScreen(moviesListState =  MoviesListViewModel.MoviesListState.Loading, onMovieClick = {})
     }
 }
