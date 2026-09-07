@@ -1,8 +1,10 @@
 package br.com.jrmantovani.movies.data.repository
 
+import br.com.jrmantovani.movies.data.mapper.toModel
 import br.com.jrmantovani.movies.data.network.MovieNetworkDataSource
+import br.com.jrmantovani.movies.domain.ImageSize
+import br.com.jrmantovani.movies.domain.Movie
 import br.com.jrmantovani.movies.domain.MovieSection
-import br.com.jrmantovani.movies.domain.toModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -43,5 +45,27 @@ class MovieRepository(
 
 
         }
+    }
+
+    suspend fun getMovieDetail(movieId: Int): Result<Movie>{
+        return withContext(ioDispatcher){
+
+            runCatching {
+
+                val movieDetailDeferred  = async { movieNetworkDataSource.getMovieDetail(movieId) }
+                val creditsDeferred= async { movieNetworkDataSource.getCredits(movieId) }
+
+                val movieDetailResponse = movieDetailDeferred.await()
+                val creditsResponse = creditsDeferred.await()
+
+                movieDetailResponse.toModel(
+                    creditsResponse.cast,
+                    imageSize = ImageSize.X_LARGE
+                    )
+            }
+
+            }
+
+
     }
 }

@@ -19,13 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
+import coil3.compose.AsyncImage
 import movies.shared.generated.resources.Res
 import movies.shared.generated.resources.homem_araranha_movie
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun CastMemberItem(
-    profilePictureUrl: String,
+    profilePictureUrl: String?,
     name:String,
     character:String,
     modifier: Modifier = Modifier
@@ -38,8 +39,8 @@ fun CastMemberItem(
         Row (
             verticalAlignment = Alignment.CenterVertically
         ){
-            Image(
-                painter = painterResource(Res.drawable.homem_araranha_movie),
+            AsyncImage(
+                model = profilePictureUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxHeight()
