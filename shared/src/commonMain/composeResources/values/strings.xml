@@ -6,4 +6,8 @@
     <string name="movie_detail_title">Detalhes do filme</string>
     <string name="movie_detail_watch_trailer">Assistir trailer</string>
 
+    <string name="error_trailer_title">Erro</string>
+    <string name="error_trailer_message">Este trailer não pode ser reproduzido aqui. Gostaria de assistir no YouTube?</string>
+    <string name="error_trailer_confirm">Sim, assistir no YouTube</string>
+    <string name="error_trailer_cancel">Cancelar</string>
 </resources>

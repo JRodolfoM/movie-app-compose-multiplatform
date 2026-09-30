@@ -1,6 +1,5 @@
 package br.com.jrmantovani.movies.ui.features.moviedetail
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -30,10 +30,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +47,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.jrmantovani.movies.domain.Movie
 import br.com.jrmantovani.movies.domain.movie1
+import br.com.jrmantovani.movies.ui.components.AlertDialogErrorTrailer
 import br.com.jrmantovani.movies.ui.components.CastMemberItem
+import br.com.jrmantovani.movies.ui.components.ModalWatchTrailer
 import br.com.jrmantovani.movies.ui.components.MovieGenreChip
 import br.com.jrmantovani.movies.ui.components.MovieInfoItem
 import br.com.jrmantovani.movies.ui.theme.MoviesAppTheme
@@ -56,10 +63,8 @@ import compose.icons.fontawesomeicons.solid.Clock
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.Star
 import movies.shared.generated.resources.Res
-import movies.shared.generated.resources.homem_araranha_movie
 import movies.shared.generated.resources.movie_detail_title
 import movies.shared.generated.resources.movie_detail_watch_trailer
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -69,8 +74,14 @@ fun MovieDetailsRoute(
     navigateBack: () -> Unit,
 ) {
     val movieDetailState by viewModel.movieDetailState.collectAsState()
+
+     val trailerState by viewModel.trailerState.collectAsState()
     MovieDetailsScreen(
         movieDetailState = movieDetailState,
+        trailerState = trailerState,
+        onCheckTrailer = { key ->
+            viewModel.isEmbeddable(key)
+        },
         onNavigationIconClick = navigateBack
     )
 }
@@ -79,9 +90,48 @@ fun MovieDetailsRoute(
 @Composable
 fun MovieDetailsScreen(
     movieDetailState: MovieDetailViewModel.MovieDetailState,
+    trailerState: MovieDetailViewModel.TrailerState,
+    onCheckTrailer: (key: String) -> Unit,
     onNavigationIconClick: () -> Unit,
 
 ) {
+    var youtubeVideoId by remember { mutableStateOf<String?>(null) }
+    var showErrorModal by remember { mutableStateOf<String?>(null) }
+    var pendingTrailerKey by remember { mutableStateOf<String?>(null) }
+    val uriHandler = LocalUriHandler.current
+
+    LaunchedEffect(trailerState) {
+        when (trailerState) {
+            is MovieDetailViewModel.TrailerState.Success -> {
+                if (trailerState.status) {
+                    youtubeVideoId = pendingTrailerKey
+                } else {
+                    showErrorModal = pendingTrailerKey
+                }
+                pendingTrailerKey = null
+            }
+            is MovieDetailViewModel.TrailerState.Error -> {
+                showErrorModal = pendingTrailerKey
+                pendingTrailerKey = null
+            }
+            else -> {}
+        }
+    }
+
+    ModalWatchTrailer(
+        youtubeKey = youtubeVideoId,
+        onDismiss = { youtubeVideoId = null }
+    )
+
+    AlertDialogErrorTrailer(
+        youtubeKey = showErrorModal,
+        onDismiss = { showErrorModal = null },
+        onConfirm = { key ->
+            showErrorModal = null
+            uriHandler.openUri("https://www.youtube.com/watch?v=$key")
+        }
+    )
+
     Scaffold (
         topBar = {
             CenterAlignedTopAppBar(
@@ -124,12 +174,24 @@ fun MovieDetailsScreen(
           contentAlignment = Alignment.Center
 
       ){
+
+
           when(movieDetailState){
               MovieDetailViewModel.MovieDetailState.Loading -> {
                   CircularProgressIndicator()
               }
               is MovieDetailViewModel.MovieDetailState.Success -> {
-                  MovieDetailsContent(movie = movieDetailState.movie)
+                  MovieDetailsContent(
+                      movie = movieDetailState.movie,
+                      trailerLoading = trailerState is MovieDetailViewModel.TrailerState.Loading,
+                      onWatchTrailerClick = { key ->
+                          pendingTrailerKey = key
+                          onCheckTrailer(key)
+
+
+                      }
+                  )
+
               }
               is MovieDetailViewModel.MovieDetailState.Error -> {
                   Text(
@@ -144,14 +206,18 @@ fun MovieDetailsScreen(
     }
 }
 
+
+
 @Composable
 fun MovieDetailsContent(
     modifier: Modifier = Modifier,
-    movie: Movie
+    movie: Movie,
+    trailerLoading: Boolean,
+    onWatchTrailerClick: (key: String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
 
@@ -239,27 +305,44 @@ fun MovieDetailsContent(
 
             }
             Spacer(modifier = Modifier.height(8.dp))
-            ElevatedButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+
+            movie.movieTrailerYoutubeKey?.let{ key ->
+                ElevatedButton(
+
+                    onClick = {
+                        if(trailerLoading) return@ElevatedButton
+
+                       onWatchTrailerClick(key)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
 
 
-            ) {
-                Icon(
-                    imageVector = FontAwesomeIcons.Solid.Play,
-                    contentDescription = null,
-                    modifier = Modifier.size(12.dp)
-                )
-                Text(
-                    text = stringResource(Res.string.movie_detail_watch_trailer),
-                    modifier = Modifier.padding(start = 16.dp),
-                    fontWeight = FontWeight.Medium,
-                    style = MaterialTheme.typography.bodyMedium
+                ) {
+                    if(trailerLoading){
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(12.dp)
+                        )
 
-                )
 
+                    }else{
+                        Icon(
+                            imageVector = FontAwesomeIcons.Solid.Play,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = stringResource(Res.string.movie_detail_watch_trailer),
+                            modifier = Modifier.padding(start = 16.dp),
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.bodyMedium
+
+                        )
+
+                    }
+
+                }
             }
 
             movie.castMembers?.let{ castMembers ->
@@ -311,6 +394,8 @@ private fun MovieDetailsScreenPreview() {
     MoviesAppTheme{
         MovieDetailsScreen(
             movieDetailState = MovieDetailViewModel.MovieDetailState.Success(movie1),
+            trailerState = MovieDetailViewModel.TrailerState.Success(false),
+            onCheckTrailer = {},
             onNavigationIconClick = {}
         )
         }

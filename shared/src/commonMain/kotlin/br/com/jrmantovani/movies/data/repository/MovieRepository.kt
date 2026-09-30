@@ -54,18 +54,33 @@ class MovieRepository(
 
                 val movieDetailDeferred  = async { movieNetworkDataSource.getMovieDetail(movieId) }
                 val creditsDeferred= async { movieNetworkDataSource.getCredits(movieId) }
+                val videosDeferred = async { movieNetworkDataSource.getVideos(movieId) }
 
                 val movieDetailResponse = movieDetailDeferred.await()
                 val creditsResponse = creditsDeferred.await()
+                val videosResponse = videosDeferred.await()
+
+                val movieTraulerYoutubeKey = videosResponse.results.firstOrNull{ videoResponse ->
+                    videoResponse.site == "YouTube" && videoResponse.type == "Trailer" && videoResponse.official
+
+                }?.key
 
                 movieDetailResponse.toModel(
-                    creditsResponse.cast,
+                    castMembersResponse = creditsResponse.cast,
+                    movieTrailerYoutubeKey = movieTraulerYoutubeKey,
                     imageSize = ImageSize.X_LARGE
                     )
             }
 
             }
 
+
+    }
+
+    suspend fun isEmbeddable(videoId: String): Boolean {
+        return withContext(ioDispatcher) {
+            movieNetworkDataSource.isEmbeddable(videoId)
+        }
 
     }
 }

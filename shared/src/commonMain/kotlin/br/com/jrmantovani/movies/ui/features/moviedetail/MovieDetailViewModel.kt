@@ -19,6 +19,9 @@ class MovieDetailViewModel (
     private val _movieDetailState = MutableStateFlow<MovieDetailState>(MovieDetailState.Loading)
     val movieDetailState = _movieDetailState
 
+    private val _trailerState = MutableStateFlow<TrailerState>(TrailerState.Idle)
+    val trailerState = _trailerState
+
     init {
         getMovieDetail()
     }
@@ -34,6 +37,28 @@ class MovieDetailViewModel (
                 }
         }
     }
+
+    fun isEmbeddable(videoId: String){
+        viewModelScope.launch {
+            _trailerState.value = TrailerState.Loading
+            val response = movieRepository.isEmbeddable(videoId)
+
+            if(response){
+                _trailerState.value = TrailerState.Success(true)
+            }else{
+                _trailerState.value = TrailerState.Success(false)
+            }
+        }
+    }
+
+
+    sealed interface TrailerState{
+        data object Idle: TrailerState
+        data object Loading: TrailerState
+        data class Success(val status: Boolean): TrailerState
+        data class Error(val message: String): TrailerState
+    }
+
 
     sealed interface MovieDetailState{
         data object Loading: MovieDetailState

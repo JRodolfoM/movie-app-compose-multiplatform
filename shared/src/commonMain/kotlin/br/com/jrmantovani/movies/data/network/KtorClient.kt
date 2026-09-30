@@ -5,6 +5,7 @@ import br.com.jrmantovani.movies.data.network.model.CastMemberListResponse
 import br.com.jrmantovani.movies.data.network.model.CastMemberResponse
 import br.com.jrmantovani.movies.data.network.model.MoviesListResponse
 import br.com.jrmantovani.movies.data.network.model.MovieResponse
+import br.com.jrmantovani.movies.data.network.model.VieosListResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.auth.Auth
@@ -18,7 +19,9 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -80,6 +83,28 @@ class KtorClient {
         return client.get("$BASE_URL/3/movie/$movieId/credits"){
             addLauguageParameter()
         }.body()
+    }
+
+    suspend fun getVideos(movieId: Int): VieosListResponse {
+        return client.get("$BASE_URL/3/movie/$movieId/videos"){
+            addLauguageParameter()
+        }.body()
+
+    }
+
+
+    suspend fun isEmbeddable(videoId: String): Boolean {
+        return try {
+            val response: HttpResponse = client.get("https://www.youtube.com/oembed") {
+                parameter("url", "https://www.youtube.com/watch?v=$videoId")
+                parameter("format", "json")
+            }
+            println("YouTube oEmbed Status: ${response.status}")
+            response.status == HttpStatusCode.OK
+        } catch (e: Exception) {
+            println("Erro ao verificar trailer: ${e.message}")
+            false
+        }
     }
 
 

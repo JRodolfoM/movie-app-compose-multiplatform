@@ -3,6 +3,7 @@ package br.com.jrmantovani.movies.data.network
 import br.com.jrmantovani.movies.data.network.model.CastMemberListResponse
 import br.com.jrmantovani.movies.data.network.model.MovieResponse
 import br.com.jrmantovani.movies.data.network.model.MoviesListResponse
+import br.com.jrmantovani.movies.data.network.model.VieosListResponse
 
 class MovieNetworkDataSourceImpl(
     private val ktorClient: KtorClient
@@ -17,5 +18,13 @@ class MovieNetworkDataSourceImpl(
 
     override suspend fun getCredits(movieId: Int): CastMemberListResponse {
        return  ktorClient.getCredits(movieId)
+    }
+
+    override suspend fun getVideos(movieId: Int): VieosListResponse {
+        return ktorClient.getVideos(movieId)
+    }
+
+    override suspend fun isEmbeddable(videoId: String): Boolean {
+        return  ktorClient.isEmbeddable(videoId)
     }
 }
